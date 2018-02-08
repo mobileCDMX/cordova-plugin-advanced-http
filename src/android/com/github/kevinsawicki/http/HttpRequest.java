@@ -2686,7 +2686,8 @@ public class HttpRequest {
   public HttpRequest contentType(final String contentType, final String charset) {
     if (charset != null && charset.length() > 0) {
       final String separator = "; " + PARAM_CHARSET + '=';
-      return header(HEADER_CONTENT_TYPE, contentType + separator + charset);
+      // return header(HEADER_CONTENT_TYPE, contentType + separator + charset);
+      return header(HEADER_CONTENT_TYPE, contentType);
     } else
       return header(HEADER_CONTENT_TYPE, contentType);
   }
