@@ -2,6 +2,7 @@
 #import "CDVFile.h"
 #import "TextResponseSerializer.h"
 #import "AFHTTPSessionManager.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface CordovaHttpPlugin()
 
@@ -18,6 +19,7 @@
 @implementation CordovaHttpPlugin {
     AFSecurityPolicy *securityPolicy;
     bool redirect;
+    NSTimeInterval _beginTransactionTime;
 }
 
 - (void)pluginInitialize {
@@ -54,6 +56,9 @@
         [dictionary setValue:response.URL.absoluteString forKey:@"url"];
         [dictionary setObject:[NSNumber numberWithInt:response.statusCode] forKey:@"status"];
         [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
+        if (_beginTransactionTime > 0) {
+            [dictionary setObject:[NSString stringWithFormat:@"%f",(CACurrentMediaTime() - _beginTransactionTime)*1000] forKey:@"elapsedTime"];
+        }
     }
 
     if (data != nil) {
@@ -183,7 +188,6 @@
     NSDictionary *headers = [command.arguments objectAtIndex:2];
     NSTimeInterval timeoutInSeconds = [[command.arguments objectAtIndex:3] doubleValue];
 
-
     [self setRequestSerializer: @"default" forManager: manager];
     [self setRequestHeaders: headers forManager: manager];
     [self setTimeout:timeoutInSeconds forManager:manager];
@@ -192,6 +196,7 @@
     CordovaHttpPlugin* __weak weakSelf = self;
 
     manager.responseSerializer = [TextResponseSerializer serializer];
+    _beginTransactionTime = CACurrentMediaTime();
     [manager GET:url parameters:parameters progress:nil success:^(NSURLSessionTask *task, id responseObject) {
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         [self handleSuccess:dictionary withResponse:(NSHTTPURLResponse*)task.response andData:responseObject];
