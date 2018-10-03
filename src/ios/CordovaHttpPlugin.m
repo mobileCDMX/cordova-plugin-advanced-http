@@ -57,7 +57,8 @@
         [dictionary setObject:[NSNumber numberWithInt:response.statusCode] forKey:@"status"];
         [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
         if (_beginTransactionTime > 0) {
-            [dictionary setObject:[NSString stringWithFormat:@"%f",(CACurrentMediaTime() - _beginTransactionTime)*1000] forKey:@"elapsedTime"];
+            NSLog(@"Total Runtime: %f", (100*(CACurrentMediaTime()  - _beginTransactionTime)));
+            [dictionary setObject:[NSString stringWithFormat:@"%f",100*(CACurrentMediaTime() - _beginTransactionTime)] forKey:@"elapsedTime"];
         }
     }
 
@@ -181,6 +182,8 @@
 
 - (void)get:(CDVInvokedUrlCommand*)command {
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    [manager.requestSerializer setValue:@"no-store" forHTTPHeaderField:@"Cache-Control"];
+    [manager.requestSerializer setCachePolicy:NSURLRequestReloadIgnoringLocalCacheData];
     manager.securityPolicy = securityPolicy;
 
     NSString *url = [command.arguments objectAtIndex:0];
