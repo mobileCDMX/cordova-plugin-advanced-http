@@ -69,10 +69,17 @@
 
 - (void)handleError:(NSMutableDictionary*)dictionary withResponse:(NSHTTPURLResponse*)response error:(NSError*)error {
     if (response != nil) {
-        [dictionary setValue:response.URL.absoluteString forKey:@"url"];
-        [dictionary setObject:[NSNumber numberWithInt:response.statusCode] forKey:@"status"];
-        [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
-        [dictionary setObject:[[NSString alloc] initWithData:(NSData *)error.userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] encoding:NSUTF8StringEncoding] forKey:@"error"];
+        @try {
+            [dictionary setValue:response.URL.absoluteString forKey:@"url"];
+            [dictionary setObject:[NSNumber numberWithInt:response.statusCode] forKey:@"status"];
+            [dictionary setObject:[self copyHeaderFields:response.allHeaderFields] forKey:@"headers"];
+            [dictionary setObject:[[NSString alloc] initWithData:(NSData *)error.userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey] encoding:NSUTF8StringEncoding] forKey:@"error"];
+        }
+        @catch (NSException *exception) {
+            
+            NSLog(@"Exception: %@", exception);
+            
+        }
     } else {
         [dictionary setObject:[self getStatusCode:error] forKey:@"status"];
         [dictionary setObject:[error localizedDescription] forKey:@"error"];
